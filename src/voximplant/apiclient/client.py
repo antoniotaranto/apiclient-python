@@ -43,7 +43,7 @@ class VoximplantAPI:
         params = args.copy()
         params["cmd"] = cmd
         headers={'Authorization': self.build_auth_header()}
-        result = requests.post("https://{}/platform_api".format(self.endpoint), params=params, headers=headers)
+        result = requests.post("https://{}/platform_api".format(self.endpoint), data=params, headers=headers)
         if result.headers.get("content-type","").split(";")[0].lower() == "application/json":
             return json.loads(result.text)
         else:
@@ -79,8 +79,7 @@ class VoximplantAPI:
         if "created" in s:
             s["created"] = self._api_datetime_utc_to_py(s["created"])
         if "billing_limits" in s:
-            for k in s["billing_limits"]:
-                self._preprocess_billing_limits_type(k)
+            self._preprocess_billing_limits_type(s["billing_limits"])
 
     def _preprocess_billing_limits_type(self, s):
         if "robokassa" in s:
@@ -494,9 +493,9 @@ class VoximplantAPI:
             pass
 
     def _preprocess_call_list_type(self, s):
-        if "dt_submit" in s:
+        if "dt_submit" in s and s["dt_submit"]:
             s["dt_submit"] = self._api_datetime_utc_to_py(s["dt_submit"])
-        if "dt_complete" in s:
+        if "dt_complete" in s and s["dt_complete"]:
             s["dt_complete"] = self._api_datetime_utc_to_py(s["dt_complete"])
 
     def _preprocess_call_list_detail_type(self, s):
@@ -1512,7 +1511,7 @@ class VoximplantAPI:
         return res
 
     def add_application(self, application_name, secure_record_storage=None):
-        """
+        r"""
         Adds a new account's application.
 
         
